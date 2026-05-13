@@ -71,6 +71,7 @@
           overrides = myOverrides;
           preferWheels = true;
           groups = [ "agent" ];
+          checkGroups = [ ];
         };
       in
       {
