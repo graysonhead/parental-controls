@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}All Done!{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="/static/css/child.css">{% endblock %}
+{% block body_class %}done-screen{% endblock %}
+{% block content %}
+<div class="done-container" style="background-color: {{ child.display_color }};">
+    <div class="done-celebration">🎉</div>
+    <div class="done-icon">{{ child.icon }}</div>
+    <h1 class="done-title">ALL DONE!</h1>
+    <p class="done-name">Great job, {{ child.name }}!</p>
+    <a href="/" class="done-back-btn" onclick="fetch('/logout', {method:'POST'})">← Back to Home</a>
+</div>
+{% endblock %}

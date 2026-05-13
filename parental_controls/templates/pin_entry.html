@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Enter PIN{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="/static/css/child.css">{% endblock %}
+{% block body_class %}pin-screen{% endblock %}
+{% block content %}
+<div class="pin-container" {% if target_color %}style="--target-color: {{ target_color }};"{% endif %}>
+    <a href="/" class="back-btn">← Back</a>
+    <div class="pin-header">
+        <span class="pin-icon">{{ target_icon }}</span>
+        <span class="pin-name">{{ target_name }}</span>
+    </div>
+
+    <div class="pin-display {% if error %}pin-error{% endif %}" id="pin-display">
+        <span class="pin-dot" id="dot-0"></span>
+        <span class="pin-dot" id="dot-1"></span>
+        <span class="pin-dot" id="dot-2"></span>
+        <span class="pin-dot" id="dot-3"></span>
+    </div>
+    {% if error %}
+    <p class="pin-error-msg">Wrong PIN — try again</p>
+    {% endif %}
+
+    <form method="post" action="{{ post_url }}" id="pin-form">
+        <input type="hidden" name="pin" id="pin-value" value="">
+        <div class="numpad">
+            {% for digit in [1,2,3,4,5,6,7,8,9,'',0,'⌫'] %}
+            {% if digit == '' %}
+            <div class="numpad-spacer"></div>
+            {% elif digit == '⌫' %}
+            <button type="button" class="numpad-btn numpad-del" onclick="deletePinDigit()">⌫</button>
+            {% else %}
+            <button type="button" class="numpad-btn" onclick="addPinDigit('{{ digit }}')">{{ digit }}</button>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </form>
+</div>
+
+<script>
+let pin = '';
+function updateDisplay() {
+    for (let i = 0; i < 4; i++) {
+        document.getElementById('dot-' + i).classList.toggle('filled', i < pin.length);
+    }
+    document.getElementById('pin-value').value = pin;
+}
+function addPinDigit(d) {
+    if (pin.length < 4) {
+        pin += d;
+        updateDisplay();
+        if (pin.length === 4) {
+            setTimeout(() => document.getElementById('pin-form').submit(), 150);
+        }
+    }
+}
+function deletePinDigit() {
+    pin = pin.slice(0, -1);
+    updateDisplay();
+}
+document.addEventListener('keydown', e => {
+    if (e.key >= '0' && e.key <= '9') addPinDigit(e.key);
+    else if (e.key === 'Backspace') deletePinDigit();
+});
+</script>
+{% endblock %}

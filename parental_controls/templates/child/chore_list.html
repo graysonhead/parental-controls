@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}{{ child.name }}'s Chores{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="/static/css/child.css">{% endblock %}
+{% block body_class %}chore-screen{% endblock %}
+{% block content %}
+<div class="chore-container">
+    <div class="chore-header" style="background-color: {{ child.display_color }};">
+        <a href="/" class="back-btn" onclick="fetch('/logout', {method:'POST'})">← Back</a>
+        <span class="chore-header-icon">{{ child.icon }}</span>
+        <span class="chore-header-name">{{ child.name }}'s Chores</span>
+    </div>
+
+    <div class="chore-list" id="chore-list">
+        {% for item in chore_items %}
+        {% set chore = item.chore %}
+        {% set completed = item.completed %}
+        {% include "child/_chore_card.html" %}
+        {% endfor %}
+    </div>
+
+    <div class="chore-footer" id="chore-footer">
+        <span class="chore-progress">{{ completed_count }} of {{ total_count }} done</span>
+        {% if total_count > 0 %}
+        <div class="chore-progress-bar">
+            <div class="chore-progress-fill" style="width: {{ (completed_count / total_count * 100)|int }}%;"></div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

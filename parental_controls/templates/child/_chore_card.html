@@ -1,0 +1,13 @@
+<div class="chore-card {% if completed %}chore-done{% endif %}"
+     id="chore-{{ chore.id }}"
+     hx-post="/web/chores/{{ chore.id }}/complete"
+     hx-target="#chore-{{ chore.id }}"
+     hx-swap="outerHTML">
+    <span class="chore-card-icon">{{ chore.icon }}</span>
+    <span class="chore-card-name">{{ chore.name }}</span>
+    {% if completed %}
+    <span class="chore-card-check">✅</span>
+    {% else %}
+    <span class="chore-card-check chore-card-check-empty">⬜</span>
+    {% endif %}
+</div>

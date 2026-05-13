@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}{{ child.name }}'s Schedule{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="/static/css/parent.css">{% endblock %}
+{% block content %}
+<div class="admin-container">
+    <header class="admin-header">
+        <h1>{{ child.icon }} {{ child.name }}'s Schedule</h1>
+        <a href="/admin">← Dashboard</a>
+    </header>
+
+    <table class="admin-table">
+        <thead>
+            <tr><th>Days</th><th>Start</th><th>End</th><th>Label</th><th></th></tr>
+        </thead>
+        <tbody>
+            {% set day_names = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] %}
+            {% for w in windows %}
+            {% set days = json.loads(w.days_of_week) %}
+            <tr>
+                <td>{% for d in days %}{{ day_names[d] }}{% if not loop.last %}, {% endif %}{% endfor %}</td>
+                <td>{{ w.start_time.strftime('%H:%M') }}</td>
+                <td>{{ w.end_time.strftime('%H:%M') }}</td>
+                <td>{{ w.label or '—' }}</td>
+                <td>
+                    <form method="post" action="/admin/time-windows/{{ w.id }}/delete" style="display:inline;">
+                        <button type="submit" class="btn-link btn-danger">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5">No time windows yet. Add one below.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h3>Add Time Window</h3>
+    <form method="post" action="/admin/children/{{ child.id }}/time-windows/add" class="admin-form">
+        <div class="form-group">
+            <label>Days</label>
+            <div class="day-checkboxes">
+                {% for i, name in [(0,'Mon'),(1,'Tue'),(2,'Wed'),(3,'Thu'),(4,'Fri'),(5,'Sat'),(6,'Sun')] %}
+                <label class="checkbox-label">
+                    <input type="checkbox" name="days_of_week" value="{{ i }}" {% if i < 5 %}checked{% endif %}>
+                    {{ name }}
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Start Time</label>
+            <input type="time" name="start_time" value="08:00" required>
+        </div>
+        <div class="form-group">
+            <label>End Time</label>
+            <input type="time" name="end_time" value="18:00" required>
+        </div>
+        <div class="form-group">
+            <label>Label (optional)</label>
+            <input type="text" name="label" placeholder="e.g. School days">
+        </div>
+        <button type="submit" class="btn">Add</button>
+    </form>
+</div>
+{% endblock %}

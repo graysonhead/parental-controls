@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}{% if child %}Edit {{ child.name }}{% else %}New Child{% endif %}{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="/static/css/parent.css">{% endblock %}
+{% block content %}
+<div class="admin-container">
+    <header class="admin-header">
+        <h1>{% if child %}Edit {{ child.name }}{% else %}New Child{% endif %}</h1>
+        <a href="/admin">← Dashboard</a>
+    </header>
+
+    <form method="post" action="{% if child %}/admin/children/{{ child.id }}/edit{% else %}/admin/children/new{% endif %}" class="admin-form">
+        <div class="form-group">
+            <label>Name</label>
+            <input type="text" name="name" value="{{ child.name if child else '' }}" required>
+        </div>
+        <div class="form-group">
+            <label>Icon (emoji)</label>
+            <input type="text" name="icon" value="{{ child.icon if child else '🧒' }}" maxlength="10">
+        </div>
+        <div class="form-group">
+            <label>Display Color</label>
+            <input type="color" name="display_color" value="{{ child.display_color if child else '#4A90D9' }}">
+        </div>
+        <div class="form-group">
+            <label>PIN (4 digits){% if child %} — leave blank to keep current{% endif %}</label>
+            <input type="password" name="pin" maxlength="4" pattern="\d{4}"
+                   {% if not child %}required{% endif %}
+                   placeholder="{% if child %}unchanged{% else %}0000{% endif %}">
+        </div>
+        <button type="submit" class="btn">Save</button>
+    </form>
+</div>
+{% endblock %}

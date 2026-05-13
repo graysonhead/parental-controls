@@ -1,0 +1,23 @@
+# Python Stuff
+__pycache__/
+build/
+dist/
+*.egg
+docs/_build/
+
+.direnv/
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Nix built files
+result/**
+result
+
+# Local dev config and generated DB
+agent.toml
+*.db

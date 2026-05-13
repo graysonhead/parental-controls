@@ -1,0 +1,8 @@
+<div class="chore-footer" id="chore-footer" hx-swap-oob="true">
+    <span class="chore-progress">{{ completed_count }} of {{ total_count }} done</span>
+    {% if total_count > 0 %}
+    <div class="chore-progress-bar">
+        <div class="chore-progress-fill" style="width: {{ (completed_count / total_count * 100)|int }}%;"></div>
+    </div>
+    {% endif %}
+</div>

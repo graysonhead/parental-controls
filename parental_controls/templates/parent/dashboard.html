@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="/static/css/parent.css">{% endblock %}
+{% block content %}
+<div class="admin-container">
+    <header class="admin-header">
+        <h1>Parental Controls</h1>
+        <nav>
+            <form method="post" action="/logout" style="display:inline;">
+                <button type="submit" class="btn-link">Log out</button>
+            </form>
+        </nav>
+    </header>
+
+    <section>
+        <div class="section-title-row">
+            <h2>Children</h2>
+            <a href="/admin/children/new" class="btn">+ Add Child</a>
+        </div>
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Child</th>
+                    <th>Chores Today</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in child_data %}
+                <tr>
+                    <td>
+                        <span style="font-size:1.5rem;">{{ row.child.icon }}</span>
+                        <strong>{{ row.child.name }}</strong>
+                    </td>
+                    <td>
+                        {% if row.chore_count == 0 %}
+                        <span class="badge badge-grey">No chores</span>
+                        {% elif row.chores_done %}
+                        <span class="badge badge-green">✅ All done</span>
+                        {% else %}
+                        <span class="badge badge-red">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td class="action-links">
+                        <a href="/admin/children/{{ row.child.id }}/edit">Edit</a>
+                        <a href="/admin/children/{{ row.child.id }}/chores">Chores</a>
+                        <a href="/admin/children/{{ row.child.id }}/time-windows">Schedule</a>
+
+                        <form method="post" action="/admin/children/{{ row.child.id }}/delete" style="display:inline;"
+                              onsubmit="return confirm('Delete {{ row.child.name }}?')">
+                            <button type="submit" class="btn-link btn-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="3">No children yet. <a href="/admin/children/new">Add one</a>.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+</div>
+{% endblock %}

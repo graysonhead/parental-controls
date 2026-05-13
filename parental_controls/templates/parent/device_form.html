@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Devices{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="/static/css/parent.css">{% endblock %}
+{% block content %}
+<div class="admin-container">
+    <header class="admin-header">
+        <h1>Devices</h1>
+        <a href="/admin">← Dashboard</a>
+    </header>
+
+    <table class="admin-table">
+        <thead>
+            <tr><th>Name</th><th>Hostname</th><th></th></tr>
+        </thead>
+        <tbody>
+            {% for device in devices %}
+            <tr>
+                <td>{{ device.name }}</td>
+                <td><code>{{ device.hostname }}</code></td>
+                <td>
+                    <form method="post" action="/admin/devices/{{ device.id }}/delete" style="display:inline;"
+                          onsubmit="return confirm('Delete {{ device.name }}?')">
+                        <button type="submit" class="btn-link btn-danger">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="3">No devices yet.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h3>Add Device</h3>
+    <form method="post" action="/admin/devices/add" class="admin-form inline-form">
+        <input type="text" name="name" placeholder="Device name" required>
+        <input type="text" name="hostname" placeholder="hostname or IP" required>
+        <button type="submit" class="btn">Add</button>
+    </form>
+</div>
+{% endblock %}

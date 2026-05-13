@@ -1,0 +1,7 @@
+server_url = "http://192.168.1.10:8000"
+poll_interval = 30  # seconds
+
+[children]
+# "Name as shown in the web UI" = "OS username on this machine"
+"Alice" = "alice"
+"Bob" = "bob"

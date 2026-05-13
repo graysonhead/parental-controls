@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Who's there?{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="/static/css/child.css">{% endblock %}
+{% block body_class %}home-screen{% endblock %}
+{% block content %}
+<div class="home-container">
+    <h1 class="home-title">Who are you?</h1>
+    <div class="home-grid">
+        {% for child in children %}
+        <a href="/pin/{{ child.id }}" class="home-tile" style="background-color: {{ child.display_color }};">
+            <span class="home-tile-icon">{{ child.icon }}</span>
+            <span class="home-tile-name">{{ child.name }}</span>
+        </a>
+        {% endfor %}
+        <a href="/pin/parent" class="home-tile home-tile-parent">
+            <span class="home-tile-icon">🔒</span>
+            <span class="home-tile-name">Parent</span>
+        </a>
+    </div>
+</div>
+{% endblock %}
