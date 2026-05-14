@@ -60,7 +60,16 @@
         python = pkgs.python313;
         projectDir = ./.;
         myOverrides = defaultPoetryOverrides.extend (final: prev: {
-          # Python dependency overrides go here
+          # Hatchling's build-backend deps aren't auto-provided when building
+          # from sdist. Supply them from nixpkgs (already bootstrapped there)
+          # to break the hatchling → pluggy → hatchling circular dependency.
+          hatchling = prev.hatchling.overridePythonAttrs (old: {
+            nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [
+              pkgs.python313Packages.pathspec
+              pkgs.python313Packages.pluggy
+              pkgs.python313Packages.trove-classifiers
+            ];
+          });
         });
 
         # Single package containing both server and agent entry points.
