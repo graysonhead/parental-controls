@@ -69,7 +69,10 @@
         package = mkPoetryApplication {
           inherit python projectDir;
           overrides = myOverrides;
-          preferWheels = true;
+          # preferWheels = true triggers a poetry2nix/pyproject.nix bug where
+          # packages with riscv64 wheel tags crash evaluation, causing deps to
+          # be silently dropped. Build from source (sdist) to avoid this.
+          preferWheels = false;
           groups = [ "agent" ];
           checkGroups = [ ];
         };
