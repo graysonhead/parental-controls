@@ -60,16 +60,14 @@
         python = pkgs.python313;
         projectDir = ./.;
         myOverrides = defaultPoetryOverrides.extend (final: prev: {
-          # Hatchling's build-backend deps aren't auto-provided when building
-          # from sdist. Supply them from nixpkgs (already bootstrapped there)
-          # to break the hatchling → pluggy → hatchling circular dependency.
-          hatchling = prev.hatchling.overridePythonAttrs (old: {
-            nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [
-              pkgs.python313Packages.pathspec
-              pkgs.python313Packages.pluggy
-              pkgs.python313Packages.trove-classifiers
-            ];
-          });
+          # Use pre-built nixpkgs packages for binary extensions that have
+          # per-arch wheels (including riscv64). Evaluating those wheels
+          # crashes poetry2nix's pep600.nix, silently dropping the package
+          # from propagatedBuildInputs. Using nixpkgs versions bypasses
+          # wheel selection entirely for these packages.
+          pydantic-core = pkgs.python313Packages.pydantic-core;
+          bcrypt = pkgs.python313Packages.bcrypt;
+          cryptography = pkgs.python313Packages.cryptography;
         });
 
         # Single package containing both server and agent entry points.
@@ -78,10 +76,7 @@
         package = mkPoetryApplication {
           inherit python projectDir;
           overrides = myOverrides;
-          # preferWheels = true triggers a poetry2nix/pyproject.nix bug where
-          # packages with riscv64 wheel tags crash evaluation, causing deps to
-          # be silently dropped. Build from source (sdist) to avoid this.
-          preferWheels = false;
+          preferWheels = true;
           groups = [ "agent" ];
           checkGroups = [ ];
         };
