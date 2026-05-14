@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
@@ -8,6 +9,8 @@ from parental_controls.api import access, children, chores, completions, time_wi
 from parental_controls.config import settings
 from parental_controls.database import create_db_and_tables
 from parental_controls.web import auth, child, parent
+
+_PACKAGE_DIR = Path(__file__).parent
 
 
 @asynccontextmanager
@@ -25,7 +28,7 @@ def create_app() -> FastAPI:
         max_age=settings.session_max_age,
     )
 
-    app.mount("/static", StaticFiles(directory="static"), name="static")
+    app.mount("/static", StaticFiles(directory=str(_PACKAGE_DIR / "static")), name="static")
 
     # API routers
     app.include_router(access.router)

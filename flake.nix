@@ -4,13 +4,9 @@
   inputs = {
     nixpkgs     = { url = "github:nixos/nixpkgs/nixpkgs-unstable"; };
     flake-utils = { url = "github:numtide/flake-utils"; };
-    poetry2nix = {
-      url = "github:nix-community/poetry2nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
-  outputs = { self, nixpkgs, flake-utils, poetry2nix, ... }:
+  outputs = { self, nixpkgs, flake-utils, ... }:
     let
       # NixOS modules are system-independent — defined outside eachDefaultSystem
       nixosModules = rec {
@@ -22,63 +18,36 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs { inherit system; };
+        py = pkgs.python313;
 
-        # Compat shims for poetry2nix against newer nixpkgs:
-        #
-        # 1. lib.licenses now includes SPDX operator functions (AND, OR, WITH).
-        #    poetry2nix iterates lib.attrValues lib.licenses expecting only attr sets,
-        #    so we filter those functions out before handing pkgs to poetry2nix.
-        #
-        # 2. Python 3.11+ has tomllib built-in, so nixpkgs dropped the `tomli`
-        #    parameter from the `build` package function. poetry2nix's bootstrapping
-        #    still calls build.override { tomli = ...; }, which fails. We wrap
-        #    `build.override` in all Python package sets to strip the tomli arg.
-        pkgsForPoetry2nix = import nixpkgs {
-          inherit system;
-          overlays = [
-            (_: prev: {
-              lib = prev.lib // {
-                licenses = prev.lib.filterAttrs (_: v: builtins.isAttrs v) prev.lib.licenses;
-              };
-              pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
-                (_: pyPrev: {
-                  build = pyPrev.build // {
-                    override = newArgs: pyPrev.build.override (builtins.removeAttrs newArgs [ "tomli" ]);
-                  };
-                  pyproject-hooks = pyPrev.pyproject-hooks // {
-                    override = newArgs: pyPrev.pyproject-hooks.override (builtins.removeAttrs newArgs [ "tomli" ]);
-                  };
-                })
-              ];
-            })
+        package = py.pkgs.buildPythonApplication {
+          pname = "parental-controls";
+          version = "0.1.0";
+          format = "pyproject";
+          src = pkgs.lib.cleanSource ./.;
+
+          nativeBuildInputs = with py.pkgs; [ poetry-core ];
+
+          propagatedBuildInputs = with py.pkgs; [
+            # Server
+            fastapi
+            uvicorn
+            sqlmodel
+            aiosqlite
+            pydantic-settings
+            bcrypt
+            itsdangerous
+            # fastapi[standard] extras
+            python-multipart
+            email-validator
+            httptools
+            uvloop
+            websockets
+            # Agent
+            httpx
           ];
-        };
 
-        inherit (poetry2nix.lib.mkPoetry2Nix { pkgs = pkgsForPoetry2nix; })
-          mkPoetryApplication defaultPoetryOverrides;
-
-        python = pkgs.python313;
-        projectDir = ./.;
-        myOverrides = defaultPoetryOverrides.extend (final: prev: {
-          # Use pre-built nixpkgs packages for binary extensions that have
-          # per-arch wheels (including riscv64). Evaluating those wheels
-          # crashes poetry2nix's pep600.nix, silently dropping the package
-          # from propagatedBuildInputs. Using nixpkgs versions bypasses
-          # wheel selection entirely for these packages.
-          pydantic-core = pkgs.python313Packages.pydantic-core;
-          bcrypt = pkgs.python313Packages.bcrypt;
-          cryptography = pkgs.python313Packages.cryptography;
-        });
-
-        # Single package containing both server and agent entry points.
-        # The console scripts (parental-controls-server, parental-controls-agent)
-        # are defined in pyproject.toml [tool.poetry.scripts].
-        package = mkPoetryApplication {
-          inherit python projectDir;
-          overrides = myOverrides;
-          preferWheels = true;
-          groups = [ "agent" ];
-          checkGroups = [ ];
+          doCheck = false;
         };
       in
       {
@@ -92,7 +61,7 @@
 
         devShells.default = pkgs.mkShell {
           buildInputs = [
-            python
+            py
             pkgs.poetry
           ];
         };

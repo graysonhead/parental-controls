@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -9,7 +11,7 @@ from parental_controls.models.child import Child
 from parental_controls.services.pin_service import verify_pin
 
 router = APIRouter(tags=["auth"])
-templates = Jinja2Templates(directory="parental_controls/templates")
+templates = Jinja2Templates(directory=str(Path(__file__).parent.parent / "templates"))
 
 
 @router.get("/", response_class=HTMLResponse)

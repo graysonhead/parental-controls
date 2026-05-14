@@ -1,5 +1,6 @@
 import json
 from datetime import date, time
+from pathlib import Path
 from typing import List
 
 from fastapi import APIRouter, Depends, Form, Request
@@ -15,7 +16,7 @@ from parental_controls.services.chore_service import all_chores_complete
 from parental_controls.services.pin_service import hash_pin
 
 router = APIRouter(prefix="/admin", tags=["admin"])
-templates = Jinja2Templates(directory="parental_controls/templates")
+templates = Jinja2Templates(directory=str(Path(__file__).parent.parent / "templates"))
 
 
 def _require_parent(request: Request):

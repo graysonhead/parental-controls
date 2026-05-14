@@ -1,0 +1,241 @@
+/* ── Home Screen ── */
+.home-screen { background: #1a202c; }
+
+.home-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    gap: 2rem;
+}
+
+.home-title {
+    color: #fff;
+    font-size: 2.5rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+.home-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 900px;
+}
+
+.home-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 2rem 1rem;
+    border-radius: 1.5rem;
+    color: #fff;
+    font-weight: 700;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    transition: transform 0.1s, box-shadow 0.1s;
+    user-select: none;
+}
+
+.home-tile:active { transform: scale(0.96); box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+.home-tile-parent { background: #4a5568; }
+
+.home-tile-icon { font-size: 4rem; line-height: 1; }
+.home-tile-name { font-size: 1.5rem; }
+
+/* ── PIN Screen ── */
+.pin-screen { background: #1a202c; }
+
+.pin-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    gap: 1.5rem;
+    position: relative;
+}
+
+.back-btn {
+    position: absolute;
+    top: 1.5rem;
+    left: 1.5rem;
+    color: rgba(255,255,255,0.7);
+    font-size: 1.1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    background: rgba(255,255,255,0.1);
+}
+
+.pin-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.pin-icon { font-size: 4rem; }
+.pin-name { font-size: 2rem; font-weight: 700; color: #fff; }
+
+.pin-display {
+    display: flex;
+    gap: 1.5rem;
+    padding: 1rem 2rem;
+    background: rgba(255,255,255,0.1);
+    border-radius: 1rem;
+}
+
+.pin-dot {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 3px solid rgba(255,255,255,0.6);
+    background: transparent;
+    transition: background 0.1s;
+}
+.pin-dot.filled { background: #fff; border-color: #fff; }
+
+@keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-10px); }
+    40% { transform: translateX(10px); }
+    60% { transform: translateX(-10px); }
+    80% { transform: translateX(10px); }
+}
+.pin-error { animation: shake 0.4s ease; border-color: #fc8181; }
+.pin-error .pin-dot { border-color: #fc8181; }
+.pin-error-msg { color: #fc8181; font-size: 1.2rem; }
+
+.numpad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    width: 100%;
+    max-width: 320px;
+}
+
+.numpad-btn {
+    padding: 1.25rem;
+    font-size: 1.75rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 1rem;
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    transition: background 0.1s, transform 0.1s;
+}
+.numpad-btn:active { background: rgba(255,255,255,0.3); transform: scale(0.95); }
+.numpad-del { background: rgba(255,100,100,0.2); color: #fc8181; }
+.numpad-spacer { visibility: hidden; }
+
+/* ── Chore List ── */
+.chore-screen { background: #f7f8fa; }
+
+.chore-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.chore-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem 1.25rem;
+    color: #fff;
+    position: relative;
+}
+.chore-header .back-btn {
+    position: static;
+    color: rgba(255,255,255,0.8);
+    background: rgba(0,0,0,0.15);
+    font-size: 1rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 0.5rem;
+}
+.chore-header-icon { font-size: 3rem; }
+.chore-header-name { font-size: 2rem; font-weight: 800; flex: 1; }
+
+.chore-list {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem;
+}
+
+.chore-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    background: #fff;
+    border-radius: 1.25rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    cursor: pointer;
+    transition: transform 0.1s, background 0.2s;
+    user-select: none;
+}
+.chore-card:active { transform: scale(0.98); }
+.chore-card.chore-done { background: #f0fff4; }
+
+.chore-card-icon { font-size: 3rem; line-height: 1; min-width: 3rem; text-align: center; }
+.chore-card-name { font-size: 1.75rem; font-weight: 700; flex: 1; }
+.chore-card-check { font-size: 2rem; }
+
+.chore-footer {
+    padding: 1rem 1.25rem 1.5rem;
+    text-align: center;
+}
+.chore-progress { font-size: 1.25rem; font-weight: 600; color: #4a5568; }
+.chore-progress-bar {
+    margin-top: 0.5rem;
+    height: 12px;
+    background: #e2e8f0;
+    border-radius: 6px;
+    overflow: hidden;
+}
+.chore-progress-fill {
+    height: 100%;
+    background: #48bb78;
+    border-radius: 6px;
+    transition: width 0.3s;
+}
+
+/* ── All Done Screen ── */
+.done-screen {}
+
+.done-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    color: #fff;
+    text-align: center;
+    padding: 2rem;
+}
+.done-celebration { font-size: 6rem; animation: bounce 0.6s infinite alternate; }
+.done-icon { font-size: 4rem; }
+.done-title { font-size: 4rem; font-weight: 900; }
+.done-name { font-size: 2rem; font-weight: 600; opacity: 0.9; }
+.done-back-btn {
+    margin-top: 1rem;
+    padding: 1rem 2rem;
+    background: rgba(0,0,0,0.2);
+    border-radius: 1rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+@keyframes bounce {
+    from { transform: translateY(0); }
+    to { transform: translateY(-20px); }
+}

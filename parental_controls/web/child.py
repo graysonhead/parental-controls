@@ -1,4 +1,5 @@
 from datetime import date
+from pathlib import Path
 
 from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -12,7 +13,7 @@ from parental_controls.models.chore_completion import DailyChoreCompletion
 from parental_controls.services.chore_service import all_chores_complete, upsert_completion
 
 router = APIRouter(tags=["child-ui"])
-templates = Jinja2Templates(directory="parental_controls/templates")
+templates = Jinja2Templates(directory=str(Path(__file__).parent.parent / "templates"))
 
 
 def _require_child_session(request: Request, child_id: int) -> bool:
