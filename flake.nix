@@ -43,10 +43,15 @@
             httptools
             uvloop
             websockets
+            # Templates
+            jinja2
             # Agent
             httpx
           ];
 
+          # nixpkgs-unstable packages are often newer than pyproject.toml upper
+          # bounds. Relax version constraints so the build accepts them.
+          pythonRelaxDeps = true;
           doCheck = false;
         };
       in
