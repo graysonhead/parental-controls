@@ -15,4 +15,4 @@ class Chore(SQLModel, table=True):
     sort_order: int = Field(default=0)
 
     child: "Child" = Relationship(back_populates="chores")
-    completions: List["DailyChoreCompletion"] = Relationship(back_populates="chore")
+    completions: List["DailyChoreCompletion"] = Relationship(back_populates="chore", cascade_delete=True)

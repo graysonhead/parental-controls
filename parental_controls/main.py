@@ -7,7 +7,6 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from parental_controls.api import access, children, chores, completions, time_windows
 from parental_controls.config import settings
-from parental_controls.database import create_db_and_tables
 from parental_controls.web import auth, child, parent
 
 _PACKAGE_DIR = Path(__file__).parent
@@ -15,7 +14,6 @@ _PACKAGE_DIR = Path(__file__).parent
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    create_db_and_tables()
     yield
 
 

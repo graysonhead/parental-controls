@@ -10,12 +10,14 @@ packages = [
 
 [tool.poetry.scripts]
 parental-controls-server = "parental_controls.main:run_server"
+parental-controls-migrate = "parental_controls.database:run_migrations"
 parental-controls-agent = "parental_controls_agent.__main__:main"
 
 [tool.poetry.dependencies]
 python = "^3.13"
 fastapi = {extras = ["standard"], version = "^0.115"}
 sqlmodel = "^0.0.22"
+alembic = "^1.13"
 aiosqlite = "^0.20"
 pydantic-settings = "^2.4"
 bcrypt = "^4.2"

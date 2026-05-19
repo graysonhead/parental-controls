@@ -73,6 +73,7 @@ in
 
       serviceConfig = {
         Type = "simple";
+        ExecStartPre = "${cfg.package}/bin/parental-controls-migrate";
         ExecStart = "${cfg.package}/bin/parental-controls-server";
         StateDirectory = "parental-controls";
         DynamicUser = true;

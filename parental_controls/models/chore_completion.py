@@ -12,7 +12,7 @@ class DailyChoreCompletion(SQLModel, table=True):
     __table_args__ = (UniqueConstraint("chore_id", "date"),)
 
     id: Optional[int] = Field(default=None, primary_key=True)
-    chore_id: int = Field(foreign_key="chore.id", index=True)
+    chore_id: int = Field(foreign_key="chore.id", index=True, ondelete="CASCADE")
     date: date
     completed: bool = Field(default=False)
     completed_at: Optional[datetime] = Field(default=None)
