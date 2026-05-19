@@ -33,6 +33,7 @@
             fastapi
             uvicorn
             sqlmodel
+            alembic
             aiosqlite
             pydantic-settings
             bcrypt
