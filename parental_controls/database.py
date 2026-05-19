@@ -11,11 +11,13 @@ engine = create_engine(
     connect_args={"check_same_thread": False},
 )
 
-_ALEMBIC_INI = Path(__file__).parent.parent / "alembic.ini"
+_MIGRATIONS_DIR = Path(__file__).parent / "migrations"
 
 
 def run_migrations() -> None:
-    cfg = Config(str(_ALEMBIC_INI))
+    cfg = Config()
+    cfg.set_main_option("script_location", str(_MIGRATIONS_DIR))
+    cfg.set_main_option("sqlalchemy.url", settings.database_url)
     with engine.begin() as connection:
         cfg.attributes["connection"] = connection
         command.upgrade(cfg, "head")
