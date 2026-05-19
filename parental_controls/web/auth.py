@@ -5,10 +5,9 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlmodel import Session, select
 
-from parental_controls.config import settings
 from parental_controls.database import get_session
 from parental_controls.models.child import Child
-from parental_controls.services.pin_service import verify_pin
+from parental_controls.services.pin_service import get_admin_pin_hash, verify_pin
 
 router = APIRouter(tags=["auth"])
 templates = Jinja2Templates(directory=str(Path(__file__).parent.parent / "templates"))
@@ -29,8 +28,8 @@ def pin_parent_get(request: Request):
 
 
 @router.post("/pin/parent", response_class=HTMLResponse)
-def pin_parent_post(request: Request, pin: str = Form(...)):
-    if verify_pin(pin, settings.admin_pin_hash):
+def pin_parent_post(request: Request, pin: str = Form(...), session: Session = Depends(get_session)):
+    if verify_pin(pin, get_admin_pin_hash(session)):
         request.session["is_parent"] = True
         return RedirectResponse("/admin", status_code=303)
     return templates.TemplateResponse(

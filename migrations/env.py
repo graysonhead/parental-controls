@@ -11,6 +11,7 @@ import parental_controls.models.child  # noqa: F401
 import parental_controls.models.chore  # noqa: F401
 import parental_controls.models.chore_completion  # noqa: F401
 import parental_controls.models.time_window  # noqa: F401
+import parental_controls.models.system_setting  # noqa: F401
 
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.database_url)

@@ -13,7 +13,7 @@ from parental_controls.models.child import Child
 from parental_controls.models.chore import Chore
 from parental_controls.models.time_window import TimeWindow
 from parental_controls.services.chore_service import all_chores_complete
-from parental_controls.services.pin_service import hash_pin
+from parental_controls.services.pin_service import get_admin_pin_hash, hash_pin, set_admin_pin_hash, verify_pin
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 templates = Jinja2Templates(directory=str(Path(__file__).parent.parent / "templates"))
@@ -199,3 +199,39 @@ def delete_time_window(window_id: int, request: Request, session: Session = Depe
         session.commit()
         return RedirectResponse(f"/admin/children/{child_id}/time-windows", status_code=303)
     return RedirectResponse("/admin", status_code=303)
+
+
+@router.get("/settings", response_class=HTMLResponse)
+def settings_page(request: Request):
+    if not _require_parent(request):
+        return RedirectResponse("/pin/parent", status_code=303)
+    return templates.TemplateResponse(request, "parent/settings.html", {"error": None, "success": False})
+
+
+@router.post("/settings/pin")
+def change_pin(
+    request: Request,
+    current_pin: str = Form(...),
+    new_pin: str = Form(...),
+    confirm_pin: str = Form(...),
+    session: Session = Depends(get_session),
+):
+    if not _require_parent(request):
+        return RedirectResponse("/pin/parent", status_code=303)
+
+    def render(error: str):
+        return templates.TemplateResponse(
+            request, "parent/settings.html", {"error": error, "success": False}
+        )
+
+    if not verify_pin(current_pin, get_admin_pin_hash(session)):
+        return render("Current PIN is incorrect.")
+    if new_pin != confirm_pin:
+        return render("New PINs do not match.")
+    if not new_pin.isdigit():
+        return render("PIN must contain digits only.")
+    if len(new_pin) < 4:
+        return render("PIN must be at least 4 digits.")
+
+    set_admin_pin_hash(session, hash_pin(new_pin))
+    return templates.TemplateResponse(request, "parent/settings.html", {"error": None, "success": True})

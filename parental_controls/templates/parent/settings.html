@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Settings{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="/static/css/parent.css">{% endblock %}
+{% block content %}
+<div class="admin-container">
+    <header class="admin-header">
+        <h1>Settings</h1>
+        <nav>
+            <a href="/admin" class="btn-link">← Dashboard</a>
+        </nav>
+    </header>
+
+    <section>
+        <h2>Change Parent PIN</h2>
+
+        {% if success %}
+        <p style="color: green; font-weight: bold;">PIN updated successfully.</p>
+        {% endif %}
+
+        {% if error %}
+        <p style="color: red;">{{ error }}</p>
+        {% endif %}
+
+        <form method="post" action="/admin/settings/pin" style="max-width: 360px;">
+            <div style="margin-bottom: 1rem;">
+                <label for="current_pin">Current PIN</label><br>
+                <input type="password" id="current_pin" name="current_pin"
+                       inputmode="numeric" pattern="[0-9]*" autocomplete="current-password"
+                       required style="font-size:1.2rem; padding:0.4rem; width:100%;">
+            </div>
+            <div style="margin-bottom: 1rem;">
+                <label for="new_pin">New PIN</label><br>
+                <input type="password" id="new_pin" name="new_pin"
+                       inputmode="numeric" pattern="[0-9]*" autocomplete="new-password"
+                       required style="font-size:1.2rem; padding:0.4rem; width:100%;">
+            </div>
+            <div style="margin-bottom: 1.5rem;">
+                <label for="confirm_pin">Confirm New PIN</label><br>
+                <input type="password" id="confirm_pin" name="confirm_pin"
+                       inputmode="numeric" pattern="[0-9]*" autocomplete="new-password"
+                       required style="font-size:1.2rem; padding:0.4rem; width:100%;">
+            </div>
+            <button type="submit" class="btn">Update PIN</button>
+        </form>
+    </section>
+</div>
+{% endblock %}
