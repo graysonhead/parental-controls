@@ -3,6 +3,10 @@ name = "parental-controls"
 version = "0.1.0"
 description = "Parental controls web service with chore tracking and time-based device access"
 authors = ["Grayson Head <grayson@graysonhead.net>"]
+packages = [
+  {include = "parental_controls"},
+  {include = "parental_controls_agent"},
+]
 
 [tool.poetry.scripts]
 parental-controls-server = "parental_controls.main:run_server"
