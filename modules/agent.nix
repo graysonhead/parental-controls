@@ -57,6 +57,7 @@ in
         Restart = "on-failure";
         RestartSec = 10;
         # Needs root to run usermod / loginctl terminate-user
+        Environment = "PATH=/run/current-system/sw/bin:/run/wrappers/bin";
       };
     };
   };
