@@ -10,5 +10,22 @@
 </head>
 <body class="{% block body_class %}{% endblock %}">
     {% block content %}{% endblock %}
+    <script>
+    (function () {
+        var p = window.location.pathname;
+        if (!p.startsWith('/admin') && !p.startsWith('/child')) return;
+        var TIMEOUT = 30000;
+        var timer;
+        function reset() { clearTimeout(timer); timer = setTimeout(doLogout, TIMEOUT); }
+        function doLogout() {
+            var f = document.createElement('form');
+            f.method = 'POST'; f.action = '/logout';
+            document.body.appendChild(f); f.submit();
+        }
+        ['mousemove','mousedown','keydown','touchstart','touchmove','scroll','click']
+            .forEach(function(e) { document.addEventListener(e, reset, {passive: true}); });
+        reset();
+    })();
+    </script>
 </body>
 </html>
