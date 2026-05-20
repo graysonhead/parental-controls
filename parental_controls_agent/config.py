@@ -1,3 +1,5 @@
+import os
+import sys
 import tomllib
 from dataclasses import dataclass
 from pathlib import Path
@@ -10,22 +12,27 @@ class AgentConfig:
     children: dict[str, str]  # child_name -> OS username
 
 
-_SEARCH_PATHS = [
-    Path("agent.toml"),
-    Path.home() / ".config" / "parental-controls" / "agent.toml",
-    Path("/etc/parental-controls/agent.toml"),
-]
+def _default_search_paths() -> list[Path]:
+    paths = [Path("agent.toml")]
+    if sys.platform == "win32":
+        programdata = os.environ.get("PROGRAMDATA", r"C:\ProgramData")
+        appdata = os.environ.get("APPDATA", "")
+        paths.append(Path(programdata) / "ParentalControls" / "agent.toml")
+        if appdata:
+            paths.append(Path(appdata) / "ParentalControls" / "agent.toml")
+    else:
+        paths.append(Path.home() / ".config" / "parental-controls" / "agent.toml")
+        paths.append(Path("/etc/parental-controls/agent.toml"))
+    return paths
 
 
 def load_config(path: Path | None = None) -> AgentConfig:
-    if path is not None:
-        candidates = [path]
-    else:
-        candidates = _SEARCH_PATHS
+    search_paths = _default_search_paths()
+    candidates = [path] if path is not None else search_paths
 
     for candidate in candidates:
         if candidate.exists():
-            data = tomllib.loads(candidate.read_text())
+            data = tomllib.loads(candidate.read_text(encoding="utf-8-sig"))
             return AgentConfig(
                 server_url=data["server_url"].rstrip("/"),
                 poll_interval=int(data.get("poll_interval", 30)),
@@ -33,5 +40,5 @@ def load_config(path: Path | None = None) -> AgentConfig:
             )
 
     raise FileNotFoundError(
-        "No agent.toml found. Searched: " + ", ".join(str(p) for p in _SEARCH_PATHS)
+        "No agent.toml found. Searched: " + ", ".join(str(p) for p in candidates)
     )

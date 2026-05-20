@@ -1,5 +1,7 @@
 import argparse
 import logging
+import os
+import sys
 import time
 from pathlib import Path
 
@@ -14,15 +16,26 @@ logging.basicConfig(
 )
 log = logging.getLogger(__name__)
 
+if sys.platform == "win32":
+    _log_dir = Path(os.environ.get("PROGRAMDATA", r"C:\ProgramData")) / "ParentalControls"
+    _log_dir.mkdir(parents=True, exist_ok=True)
+    _fh = logging.FileHandler(_log_dir / "agent.log", encoding="utf-8")
+    _fh.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s"))
+    logging.getLogger().addHandler(_fh)
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Parental controls polling agent")
+    if sys.platform == "win32":
+        default_paths = r".\agent.toml, %PROGRAMDATA%\ParentalControls\agent.toml"
+    else:
+        default_paths = "./agent.toml, ~/.config/parental-controls/agent.toml, /etc/parental-controls/agent.toml"
     parser.add_argument(
         "-c", "--config",
         type=Path,
         default=None,
         metavar="PATH",
-        help="Path to agent.toml (default: search ./agent.toml, ~/.config/parental-controls/agent.toml, /etc/parental-controls/agent.toml)",
+        help=f"Path to agent.toml (default: search {default_paths})",
     )
     args = parser.parse_args()
 
