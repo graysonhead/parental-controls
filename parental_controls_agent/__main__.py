@@ -41,6 +41,13 @@ def main() -> None:
 
     config = load_config(args.config)
     backend = get_backend()
+
+    for os_username in config.children.values():
+        try:
+            backend.setup_user(os_username)
+        except Exception as e:
+            log.warning("setup_user failed for %s: %s", os_username, e)
+
     enforcer = Enforcer(children=config.children, backend=backend)
 
     log.info(

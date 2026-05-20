@@ -5,6 +5,9 @@ log = logging.getLogger(__name__)
 
 
 class LinuxBackend:
+    def setup_user(self, username: str) -> None:
+        pass  # no extra setup needed on Linux
+
     def enable_user(self, username: str) -> None:
         log.info("enabling user %s", username)
         subprocess.run(["usermod", "-U", username], check=True)
