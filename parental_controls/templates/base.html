@@ -14,7 +14,7 @@
     (function () {
         var p = window.location.pathname;
         if (!p.startsWith('/admin') && !p.startsWith('/child')) return;
-        var TIMEOUT = 30000;
+        var TIMEOUT = 300000;
         var timer;
         function reset() { clearTimeout(timer); timer = setTimeout(doLogout, TIMEOUT); }
         function doLogout() {
