@@ -10,18 +10,40 @@ class LinuxBackend:
 
     def enable_user(self, username: str) -> None:
         log.info("enabling user %s", username)
-        subprocess.run(["usermod", "-U", username], check=True)
+        result = subprocess.run(["usermod", "-U", username], capture_output=True, text=True)
+        if result.returncode != 0:
+            # Passwordless accounts have nothing to unlock; log and move on
+            log.warning("usermod -U failed for %s (rc=%d): %s", username, result.returncode, result.stderr.strip())
 
     def disable_user(self, username: str) -> None:
         log.info("disabling user %s", username)
-        subprocess.run(["usermod", "-L", username], check=True)
+        result = subprocess.run(["usermod", "-L", username], capture_output=True, text=True)
+        if result.returncode != 0:
+            log.warning("usermod -L failed for %s (rc=%d): %s", username, result.returncode, result.stderr.strip())
 
     def force_logoff(self, username: str) -> None:
         log.info("terminating sessions for %s", username)
         if self._kde_logout(username):
             return
-        # No check=True — loginctl exits non-zero if the user has no sessions
-        subprocess.run(["loginctl", "terminate-user", username])
+        self._loginctl_terminate_sessions(username)
+
+    def _loginctl_terminate_sessions(self, username: str) -> None:
+        result = subprocess.run(
+            ["loginctl", "list-sessions", "--no-legend"],
+            capture_output=True,
+            text=True,
+        )
+        sessions = [
+            line.split()[0]
+            for line in result.stdout.splitlines()
+            if len(line.split()) >= 3 and line.split()[2] == username
+        ]
+        if not sessions:
+            log.info("no loginctl sessions found for %s", username)
+            return
+        for session_id in sessions:
+            log.info("terminating session %s for %s", session_id, username)
+            subprocess.run(["loginctl", "terminate-session", session_id])
 
     def _kde_logout(self, username: str) -> bool:
         dbus_addr = self._find_dbus_address(username)
