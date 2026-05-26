@@ -12,7 +12,7 @@ _CHECK_SCRIPT = _DATA_DIR / "logon_check.sh"
 _LOG_FILE = _DATA_DIR / "logon_check.log"
 
 _CHECK_SCRIPT_LINES = [
-    "#!/bin/bash",
+    "#!/usr/bin/env bash",
     "# Parental Controls logon check - auto-generated, do not edit.",
     f'exec >>{_LOG_FILE} 2>&1',
     "echo \"$(date): logon_check started user=$(id -un) DISPLAY=$DISPLAY WAYLAND=$WAYLAND_DISPLAY\"",
