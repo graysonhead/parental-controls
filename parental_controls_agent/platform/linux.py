@@ -31,17 +31,11 @@ _CHECK_SCRIPT_LINES = [
     "        --method org.freedesktop.Notifications.Notify \\",
     '        "Parental Controls" 0 "dialog-warning" "$TITLE" "$MSG" \'[]\' \'{}\' 10000',
     "    sleep 10",
-    "elif command -v kdialog &>/dev/null; then",
-    '    kdialog --title "$TITLE" --sorry "$MSG" &',
-    "    sleep 10",
-    "    kill %1 2>/dev/null",
-    "elif command -v zenity &>/dev/null; then",
-    '    zenity --warning --title="$TITLE" --text="$MSG" --timeout=10',
     "else",
     "    sleep 10",
     "fi",
     "",
-    'loginctl terminate-session "$XDG_SESSION_ID"',
+    "qdbus org.kde.Shutdown /Shutdown logout",
 ]
 
 _AUTOSTART_LINES = [
@@ -88,49 +82,17 @@ class LinuxBackend:
         (_DENIED_DIR / username).touch()
 
     def force_logoff(self, username: str) -> None:
-        log.info("logging off graphical sessions for %s", username)
-        graphical = self._graphical_session_ids(username)
-        if not graphical:
-            log.info("no graphical sessions found for %s", username)
-            return
-
+        log.info("logging off graphical session for %s", username)
         session_env = self._find_session_env(username)
-        if session_env:
-            result = subprocess.run(
-                ["runuser", "-u", username, "--", str(_CHECK_SCRIPT)],
-                env={**os.environ, **session_env},
-            )
-            if result.returncode == 0:
-                return
-            log.warning("check script exited %d for %s, falling back", result.returncode, username)
-
-        for session_id in graphical:
-            log.info("terminating session %s for %s", session_id, username)
-            subprocess.run(["loginctl", "terminate-session", session_id])
-
-    def _graphical_session_ids(self, username: str) -> list[str]:
+        if not session_env:
+            log.info("no graphical session found for %s", username)
+            return
         result = subprocess.run(
-            ["loginctl", "list-sessions", "--no-legend"],
-            capture_output=True, text=True,
+            ["runuser", "-u", username, "--", str(_CHECK_SCRIPT)],
+            env={**os.environ, **session_env},
         )
-        ids = []
-        for line in result.stdout.splitlines():
-            parts = line.split()
-            if len(parts) >= 3 and parts[2] == username:
-                session_id = parts[0]
-                if self._session_type(session_id) in ("x11", "wayland", "mir"):
-                    ids.append(session_id)
-        return ids
-
-    def _session_type(self, session_id: str) -> str:
-        result = subprocess.run(
-            ["loginctl", "show-session", session_id, "--property=Type"],
-            capture_output=True, text=True,
-        )
-        for line in result.stdout.splitlines():
-            if line.startswith("Type="):
-                return line.split("=", 1)[1].strip()
-        return ""
+        if result.returncode != 0:
+            log.warning("check script exited %d for %s", result.returncode, username)
 
     def _find_session_env(self, username: str) -> dict | None:
         pids = subprocess.run(["pgrep", "-u", username], capture_output=True, text=True)
