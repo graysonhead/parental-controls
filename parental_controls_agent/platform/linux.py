@@ -54,6 +54,8 @@ def _write_check_script() -> None:
     _ensure_dirs()
     _CHECK_SCRIPT.write_text("\n".join(_CHECK_SCRIPT_LINES) + "\n")
     _CHECK_SCRIPT.chmod(0o755)
+    _LOG_FILE.touch()
+    _LOG_FILE.chmod(0o666)  # child users must be able to append to this
 
 
 def _autostart_file(username: str) -> Path:
