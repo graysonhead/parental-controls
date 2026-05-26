@@ -11,30 +11,35 @@ _CHECK_SCRIPT  = _DATA_DIR / "logon_check.sh"
 _AUTOSTART_DIR = Path("/etc/xdg/autostart")
 _AUTOSTART     = _AUTOSTART_DIR / "parental-controls.desktop"
 
+_LOG_FILE = _DATA_DIR / "logon_check.log"
+
 _CHECK_SCRIPT_LINES = [
     "#!/bin/bash",
     "# Parental Controls logon check - auto-generated, do not edit.",
+    f'exec >>{_LOG_FILE} 2>&1',
+    "echo \"$(date): logon_check started user=$(id -un) DISPLAY=$DISPLAY WAYLAND=$WAYLAND_DISPLAY\"",
+    "PATH=/run/current-system/sw/bin:/usr/bin:/bin:$PATH",
     f'DENIED_DIR="{_DENIED_DIR}"',
     'USERNAME=$(id -un)',
     "",
-    '[ -f "$DENIED_DIR/$USERNAME" ] || exit 0',
-    '[ -n "$DISPLAY" ] || [ -n "$WAYLAND_DISPLAY" ] || exit 0',
+    '[ -f "$DENIED_DIR/$USERNAME" ] || { echo "$(date): no denied marker, exiting"; exit 0; }',
+    '[ -n "$DISPLAY" ] || [ -n "$WAYLAND_DISPLAY" ] || { echo "$(date): no display, exiting"; exit 0; }',
     "",
     'MSG="Your computer time is up or your chores are not done yet.\\n\\nYou will be logged off."',
     'TITLE="Parental Controls"',
     "",
-    "if command -v gdbus &>/dev/null; then",
-    "    gdbus call --session \\",
-    "        --dest org.freedesktop.Notifications \\",
-    "        --object-path /org/freedesktop/Notifications \\",
-    "        --method org.freedesktop.Notifications.Notify \\",
-    '        "Parental Controls" 0 "dialog-warning" "$TITLE" "$MSG" \'[]\' \'{}\' 10000',
-    "    sleep 10",
-    "else",
-    "    sleep 10",
-    "fi",
+    "echo \"$(date): sending notification\"",
+    "gdbus call --session \\",
+    "    --dest org.freedesktop.Notifications \\",
+    "    --object-path /org/freedesktop/Notifications \\",
+    "    --method org.freedesktop.Notifications.Notify \\",
+    '    "Parental Controls" 0 "dialog-warning" "$TITLE" "$MSG" \'[]\' \'{}\' 10000',
+    "echo \"$(date): notification sent (rc=$?), sleeping 10s\"",
+    "sleep 10",
     "",
+    "echo \"$(date): calling qdbus logout\"",
     "qdbus org.kde.Shutdown /Shutdown logout",
+    "echo \"$(date): qdbus logout returned rc=$?\"",
 ]
 
 _AUTOSTART_LINES = [
