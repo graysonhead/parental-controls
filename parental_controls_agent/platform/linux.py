@@ -5,11 +5,9 @@ from pathlib import Path
 
 log = logging.getLogger(__name__)
 
-_DATA_DIR      = Path("/var/lib/parental-controls")
-_DENIED_DIR    = _DATA_DIR / "denied"
-_CHECK_SCRIPT  = _DATA_DIR / "logon_check.sh"
-_AUTOSTART_DIR = Path("/etc/xdg/autostart")
-_AUTOSTART     = _AUTOSTART_DIR / "parental-controls.desktop"
+_DATA_DIR     = Path("/var/lib/parental-controls")
+_DENIED_DIR   = _DATA_DIR / "denied"
+_CHECK_SCRIPT = _DATA_DIR / "logon_check.sh"
 
 _LOG_FILE = _DATA_DIR / "logon_check.log"
 
@@ -42,16 +40,6 @@ _CHECK_SCRIPT_LINES = [
     "echo \"$(date): qdbus logout returned rc=$?\"",
 ]
 
-_AUTOSTART_LINES = [
-    "[Desktop Entry]",
-    "Type=Application",
-    "Name=Parental Controls Check",
-    f"Exec={_CHECK_SCRIPT}",
-    "X-GNOME-Autostart-enabled=true",
-    "NoDisplay=true",
-]
-
-
 def _ensure_dirs() -> None:
     _DATA_DIR.mkdir(parents=True, exist_ok=True)
     _DENIED_DIR.mkdir(parents=True, exist_ok=True)
@@ -63,15 +51,31 @@ def _write_check_script() -> None:
     _CHECK_SCRIPT.chmod(0o755)
 
 
-def _write_autostart() -> None:
-    _AUTOSTART_DIR.mkdir(parents=True, exist_ok=True)
-    _AUTOSTART.write_text("\n".join(_AUTOSTART_LINES) + "\n")
+def _autostart_file(username: str) -> Path:
+    import pwd
+    home = Path(pwd.getpwnam(username).pw_dir)
+    return home / ".config" / "autostart" / "parental-controls.desktop"
+
+
+def _write_autostart(username: str) -> None:
+    autostart = _autostart_file(username)
+    autostart.parent.mkdir(parents=True, exist_ok=True)
+    lines = [
+        "[Desktop Entry]",
+        "Type=Application",
+        "Name=Parental Controls Check",
+        f"Exec={_CHECK_SCRIPT}",
+        "X-GNOME-Autostart-enabled=true",
+        "NoDisplay=true",
+    ]
+    autostart.write_text("\n".join(lines) + "\n")
+    autostart.chmod(0o444)  # root-owned, read-only so the user can't remove it
 
 
 class LinuxBackend:
     def setup_user(self, username: str) -> None:
         _write_check_script()
-        _write_autostart()
+        _write_autostart(username)
 
     def enable_user(self, username: str) -> None:
         log.info("enabling user %s", username)
