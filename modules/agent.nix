@@ -56,8 +56,10 @@ in
         ExecStart = "${cfg.package}/bin/parental-controls-agent -c ${configFile}";
         Restart = "on-failure";
         RestartSec = 10;
-        # Needs root to run usermod / loginctl terminate-user
-      Environment = "PATH=/run/current-system/sw/bin:/run/wrappers/bin";
+        # Needs root to write /var/lib/parental-controls and run runuser
+        StateDirectory = "parental-controls";
+        StateDirectoryMode = "0755";
+        Environment = "PATH=/run/current-system/sw/bin:/run/wrappers/bin";
       };
     };
   };

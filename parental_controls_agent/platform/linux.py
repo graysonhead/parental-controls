@@ -7,8 +7,7 @@ log = logging.getLogger(__name__)
 
 _DATA_DIR      = Path("/var/lib/parental-controls")
 _DENIED_DIR    = _DATA_DIR / "denied"
-_LIB_DIR       = Path("/usr/local/lib/parental-controls")
-_CHECK_SCRIPT  = _LIB_DIR / "logon_check.sh"
+_CHECK_SCRIPT  = _DATA_DIR / "logon_check.sh"
 _AUTOSTART_DIR = Path("/etc/xdg/autostart")
 _AUTOSTART     = _AUTOSTART_DIR / "parental-controls.desktop"
 
@@ -51,7 +50,6 @@ _AUTOSTART_LINES = [
 def _ensure_dirs() -> None:
     _DATA_DIR.mkdir(parents=True, exist_ok=True)
     _DENIED_DIR.mkdir(parents=True, exist_ok=True)
-    _LIB_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def _write_check_script() -> None:
