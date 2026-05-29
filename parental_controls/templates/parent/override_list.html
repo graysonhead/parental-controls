@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}{{ child.name }}'s Overrides{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="/static/css/parent.css">{% endblock %}
+{% block content %}
+<div class="admin-container">
+    <header class="admin-header">
+        <h1>{{ child.icon }} {{ child.name }}'s Overrides</h1>
+        <a href="/admin">← Dashboard</a>
+    </header>
+
+    <section>
+        <h2 style="font-size:1.1rem;margin-bottom:0.75rem;">Active Overrides</h2>
+        <table class="admin-table">
+            <thead>
+                <tr><th>Type</th><th>Reason</th><th>Expires</th><th>Created</th><th></th></tr>
+            </thead>
+            <tbody>
+                {% for ov in overrides %}
+                <tr>
+                    <td>
+                        {% if ov.override_type == "grant" %}
+                        <span class="badge badge-green">Grant</span>
+                        {% else %}
+                        <span class="badge badge-red">Revoke</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ ov.reason or '—' }}</td>
+                    <td>{{ ov.expires_at.strftime("%-I:%M %p, %b %-d") }}</td>
+                    <td>{{ ov.created_at.strftime("%-I:%M %p, %b %-d") }}</td>
+                    <td>
+                        <form method="post" action="/admin/overrides/{{ ov.id }}/cancel">
+                            <button type="submit" class="btn-link btn-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="5">No active overrides.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+
+    <section>
+        <h2 style="font-size:1.1rem;margin-bottom:0.75rem;">Add Override</h2>
+        <form method="post" action="/admin/children/{{ child.id }}/overrides/full" class="admin-form">
+            <div class="form-group">
+                <label>Type</label>
+                <div style="display:flex;gap:1.5rem;">
+                    <label class="checkbox-label"><input type="radio" name="override_type" value="grant" checked> Grant access</label>
+                    <label class="checkbox-label"><input type="radio" name="override_type" value="revoke"> Revoke access</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Duration</label>
+                <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+                    {% for val, label in [("1h","1 Hour"),("today","Rest of Today"),("tomorrow","Tomorrow"),("weekend","Weekend")] %}
+                    <label class="checkbox-label"><input type="radio" name="duration" value="{{ val }}" {% if loop.first %}checked{% endif %}> {{ label }}</label>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Reason (optional)</label>
+                <input type="text" name="reason" placeholder="e.g. Completed extra chores">
+            </div>
+            <button type="submit" class="btn">Add Override</button>
+        </form>
+    </section>
+</div>
+{% endblock %}

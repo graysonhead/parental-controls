@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 
-from parental_controls.api import access, children, chores, completions, time_windows
+from parental_controls.api import access, children, chores, completions, overrides, time_windows
 from parental_controls.config import settings
 from parental_controls.web import auth, child, parent
 
@@ -33,6 +33,7 @@ def create_app() -> FastAPI:
     app.include_router(children.router)
     app.include_router(chores.router)
     app.include_router(completions.router)
+    app.include_router(overrides.router)
     app.include_router(time_windows.router)
 
     # Web UI routers

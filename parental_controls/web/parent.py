@@ -1,5 +1,5 @@
 import json
-from datetime import date, time
+from datetime import date, datetime, time
 from pathlib import Path
 from typing import List
 
@@ -9,10 +9,12 @@ from fastapi.templating import Jinja2Templates
 from sqlmodel import Session, select
 
 from parental_controls.database import get_session
+from parental_controls.models.access_override import AccessOverride, OverrideType
 from parental_controls.models.child import Child
 from parental_controls.models.chore import Chore
 from parental_controls.models.time_window import TimeWindow
 from parental_controls.services.chore_service import all_chores_complete
+from parental_controls.services.override_service import cancel_override, create_override, get_active_override, get_active_overrides
 from parental_controls.services.pin_service import get_admin_pin_hash, hash_pin, set_admin_pin_hash, verify_pin
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -29,11 +31,13 @@ def dashboard(request: Request, session: Session = Depends(get_session)):
         return RedirectResponse("/pin/parent", status_code=303)
     children = session.exec(select(Child)).all()
     today = date.today()
+    now = datetime.now()
     child_data = [
         {
             "child": child,
             "chores_done": all_chores_complete(session, child.id, today),
             "chore_count": len(session.exec(select(Chore).where(Chore.child_id == child.id)).all()),
+            "active_overrides": get_active_overrides(session, child.id, now),
         }
         for child in children
     ]
@@ -199,6 +203,90 @@ def delete_time_window(window_id: int, request: Request, session: Session = Depe
         session.commit()
         return RedirectResponse(f"/admin/children/{child_id}/time-windows", status_code=303)
     return RedirectResponse("/admin", status_code=303)
+
+
+@router.get("/children/{child_id}/overrides", response_class=HTMLResponse)
+def overrides_page(child_id: int, request: Request, session: Session = Depends(get_session)):
+    if not _require_parent(request):
+        return RedirectResponse("/pin/parent", status_code=303)
+    child = session.get(Child, child_id)
+    if not child:
+        return RedirectResponse("/admin", status_code=303)
+    overrides = get_active_overrides(session, child_id, datetime.now())
+    return templates.TemplateResponse(
+        request, "parent/override_list.html", {"child": child, "overrides": overrides}
+    )
+
+
+@router.post("/children/{child_id}/overrides/full")
+def web_create_override_full(
+    child_id: int,
+    request: Request,
+    override_type: str = Form(...),
+    duration: str = Form(...),
+    reason: str = Form(default=""),
+    session: Session = Depends(get_session),
+):
+    if not _require_parent(request):
+        return RedirectResponse("/pin/parent", status_code=303)
+    create_override(
+        session=session,
+        child_id=child_id,
+        override_type=OverrideType(override_type),
+        duration=duration,
+        reason=reason or None,
+        now=datetime.now(),
+    )
+    return RedirectResponse(f"/admin/children/{child_id}/overrides", status_code=303)
+
+
+@router.post("/children/{child_id}/overrides", response_class=HTMLResponse)
+def web_create_override(
+    child_id: int,
+    request: Request,
+    override_type: str = Form(...),
+    duration: str = Form(...),
+    reason: str = Form(default=""),
+    session: Session = Depends(get_session),
+):
+    if not _require_parent(request):
+        return RedirectResponse("/pin/parent", status_code=303)
+    create_override(
+        session=session,
+        child_id=child_id,
+        override_type=OverrideType(override_type),
+        duration=duration,
+        reason=reason or None,
+        now=datetime.now(),
+    )
+    now = datetime.now()
+    return templates.TemplateResponse(
+        request,
+        "parent/_override_status.html",
+        {"child_id": child_id, "active_overrides": get_active_overrides(session, child_id, now)},
+    )
+
+
+@router.post("/overrides/{override_id}/cancel", response_class=HTMLResponse)
+def web_cancel_override(
+    override_id: int,
+    request: Request,
+    session: Session = Depends(get_session),
+):
+    if not _require_parent(request):
+        return RedirectResponse("/pin/parent", status_code=303)
+    override = session.get(AccessOverride, override_id)
+    child_id = override.child_id if override else None
+    cancel_override(session, override_id)
+    if request.headers.get("HX-Request"):
+        now = datetime.now()
+        active_overrides = get_active_overrides(session, child_id, now) if child_id else []
+        return templates.TemplateResponse(
+            request,
+            "parent/_override_status.html",
+            {"child_id": child_id, "active_overrides": active_overrides},
+        )
+    return RedirectResponse(f"/admin/children/{child_id}/overrides", status_code=303)
 
 
 @router.get("/settings", response_class=HTMLResponse)

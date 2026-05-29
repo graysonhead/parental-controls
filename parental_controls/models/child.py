@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, List, Optional
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
+    from parental_controls.models.access_override import AccessOverride
     from parental_controls.models.chore import Chore
     from parental_controls.models.time_window import TimeWindow
 
@@ -16,3 +17,4 @@ class Child(SQLModel, table=True):
 
     time_windows: List["TimeWindow"] = Relationship(back_populates="child")
     chores: List["Chore"] = Relationship(back_populates="child")
+    overrides: List["AccessOverride"] = Relationship(back_populates="child")

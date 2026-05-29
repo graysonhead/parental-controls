@@ -23,6 +23,7 @@
                 <tr>
                     <th>Child</th>
                     <th>Chores Today</th>
+                    <th>Override</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -42,10 +43,16 @@
                         <span class="badge badge-red">Pending</span>
                         {% endif %}
                     </td>
+                    <td id="override-{{ row.child.id }}">
+                        {% with child_id=row.child.id, active_overrides=row.active_overrides %}
+                          {% include "parent/_override_status.html" %}
+                        {% endwith %}
+                    </td>
                     <td class="action-links">
                         <a href="/admin/children/{{ row.child.id }}/edit">Edit</a>
                         <a href="/admin/children/{{ row.child.id }}/chores">Chores</a>
                         <a href="/admin/children/{{ row.child.id }}/time-windows">Schedule</a>
+                        <a href="/admin/children/{{ row.child.id }}/overrides">Overrides</a>
 
                         <form method="post" action="/admin/children/{{ row.child.id }}/delete" style="display:inline;"
                               onsubmit="return confirm('Delete {{ row.child.name }}?')">
@@ -54,7 +61,7 @@
                     </td>
                 </tr>
                 {% else %}
-                <tr><td colspan="3">No children yet. <a href="/admin/children/new">Add one</a>.</td></tr>
+                <tr><td colspan="4">No children yet. <a href="/admin/children/new">Add one</a>.</td></tr>
                 {% endfor %}
             </tbody>
         </table>

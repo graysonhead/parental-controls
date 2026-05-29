@@ -3,18 +3,21 @@ from typing import List
 
 from sqlmodel import Session, select
 
+from parental_controls.models.access_override import OverrideType
 from parental_controls.models.child import Child
 from parental_controls.models.chore import Chore
 from parental_controls.models.chore_completion import DailyChoreCompletion
 from parental_controls.models.time_window import TimeWindow
+from parental_controls.services.override_service import get_active_override
 
 
 class ChildAccessResult:
-    def __init__(self, child_id: int, child_name: str, allowed: bool, reason: str):
+    def __init__(self, child_id: int, child_name: str, allowed: bool, reason: str, active_override=None):
         self.child_id = child_id
         self.child_name = child_name
         self.allowed = allowed
         self.reason = reason
+        self.active_override = active_override
 
 
 class AccessResult:
@@ -24,6 +27,12 @@ class AccessResult:
 
 
 def check_child_access(session: Session, child: Child, now: datetime) -> ChildAccessResult:
+    active_override = get_active_override(session, child.id, now)
+    if active_override:
+        if active_override.override_type == OverrideType.REVOKE:
+            return ChildAccessResult(child.id, child.name, False, "access_revoked", active_override)
+        return ChildAccessResult(child.id, child.name, True, "access_granted", active_override)
+
     windows = session.exec(
         select(TimeWindow).where(TimeWindow.child_id == child.id)
     ).all()

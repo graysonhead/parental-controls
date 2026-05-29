@@ -111,3 +111,22 @@ code {
     font-family: monospace;
     font-size: 0.9rem;
 }
+
+.override-list { list-style: none; margin: 0 0 0.25rem; padding: 0; display: flex; flex-direction: column; gap: 0.25rem; }
+.override-item { display: flex; align-items: center; }
+
+.override-buttons { display: flex; flex-wrap: wrap; gap: 0.3rem; align-items: center; }
+.override-label { font-size: 0.75rem; font-weight: 700; color: #718096; min-width: 2.5rem; }
+
+.btn-override {
+    padding: 0.2rem 0.45rem;
+    border: none;
+    border-radius: 0.35rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+.btn-override:hover { opacity: 0.8; }
+.btn-grant { background: #c6f6d5; color: #276749; }
+.btn-revoke { background: #fed7d7; color: #9b2c2c; }

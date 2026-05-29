@@ -1,0 +1,45 @@
+{% if active_overrides %}
+  <ul class="override-list">
+    {% for ov in active_overrides %}
+    <li class="override-item">
+      {% if ov.override_type == "grant" %}
+        <span class="badge badge-green">Granted until {{ ov.expires_at.strftime("%-I:%M %p") }}</span>
+      {% else %}
+        <span class="badge badge-red">Revoked until {{ ov.expires_at.strftime("%-I:%M %p") }}</span>
+      {% endif %}
+      <form method="post" action="/admin/overrides/{{ ov.id }}/cancel" style="display:inline;"
+            hx-post="/admin/overrides/{{ ov.id }}/cancel"
+            hx-target="#override-{{ child_id }}"
+            hx-swap="innerHTML">
+        <button type="submit" class="btn-link btn-danger" style="margin-left:0.4rem;">✕</button>
+      </form>
+    </li>
+    {% endfor %}
+  </ul>
+{% endif %}
+<div class="override-buttons" style="margin-top:{% if active_overrides %}0.5rem{% else %}0{% endif %};">
+  <span class="override-label">Grant:</span>
+  {% for dur, label in [("1h","+1h"),("today","+Today"),("tomorrow","+Tomorrow"),("weekend","+Wknd")] %}
+  <form method="post" action="/admin/children/{{ child_id }}/overrides" style="display:inline;"
+        hx-post="/admin/children/{{ child_id }}/overrides"
+        hx-target="#override-{{ child_id }}"
+        hx-swap="innerHTML">
+    <input type="hidden" name="override_type" value="grant">
+    <input type="hidden" name="duration" value="{{ dur }}">
+    <button type="submit" class="btn-override btn-grant">{{ label }}</button>
+  </form>
+  {% endfor %}
+</div>
+<div class="override-buttons" style="margin-top:0.35rem;">
+  <span class="override-label">Revoke:</span>
+  {% for dur, label in [("1h","-1h"),("today","-Today"),("tomorrow","-Tomorrow"),("weekend","-Wknd")] %}
+  <form method="post" action="/admin/children/{{ child_id }}/overrides" style="display:inline;"
+        hx-post="/admin/children/{{ child_id }}/overrides"
+        hx-target="#override-{{ child_id }}"
+        hx-swap="innerHTML">
+    <input type="hidden" name="override_type" value="revoke">
+    <input type="hidden" name="duration" value="{{ dur }}">
+    <button type="submit" class="btn-override btn-revoke">{{ label }}</button>
+  </form>
+  {% endfor %}
+</div>
