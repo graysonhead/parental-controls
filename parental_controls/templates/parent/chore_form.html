@@ -10,12 +10,12 @@
 
     <table class="admin-table">
         <thead>
-            <tr><th>Order</th><th>Icon</th><th>Name</th><th></th></tr>
+            <tr><th></th><th>Icon</th><th>Name</th><th></th></tr>
         </thead>
-        <tbody>
+        <tbody id="chore-table-body">
             {% for chore in chores %}
-            <tr>
-                <td>{{ chore.sort_order }}</td>
+            <tr data-chore-id="{{ chore.id }}">
+                <td style="cursor:grab;color:#999;user-select:none;">⠿</td>
                 <td style="font-size:1.5rem;">{{ chore.icon }}</td>
                 <td>{{ chore.name }}</td>
                 <td>
@@ -34,8 +34,29 @@
     <form method="post" action="/admin/children/{{ child.id }}/chores/add" class="admin-form inline-form">
         <input type="text" name="icon" placeholder="🧹" value="✅" style="width:4rem;">
         <input type="text" name="name" placeholder="Chore name" required>
-        <input type="number" name="sort_order" placeholder="Order" value="{{ chores|length }}" style="width:5rem;">
+        <input type="hidden" name="sort_order" value="{{ chores|length }}">
         <button type="submit" class="btn">Add</button>
     </form>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
+<script>
+    const tbody = document.getElementById('chore-table-body');
+    if (tbody) {
+        Sortable.create(tbody, {
+            handle: 'td:first-child',
+            animation: 150,
+            onEnd: function () {
+                const rows = tbody.querySelectorAll('tr[data-chore-id]');
+                rows.forEach(function (row, index) {
+                    const choreId = row.dataset.choreId;
+                    fetch('/api/v1/children/chores/' + choreId, {
+                        method: 'PUT',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({sort_order: index})
+                    });
+                });
+            }
+        });
+    }
+</script>
 {% endblock %}
